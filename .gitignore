@@ -1,0 +1,29 @@
+# Generated weather art images (user output — don't commit)
+*.png
+*.jpg
+*.jpeg
+*.tiff
+*.tif
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# pytest
+.pytest_cache/
+.cache/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~

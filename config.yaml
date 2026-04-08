@@ -1,0 +1,276 @@
+# =============================================================================
+# WeatherChartArt — configuration file
+# =============================================================================
+# Edit this file to control every aspect of data fetching and image rendering.
+# All colour schemes are defined in the `colormaps` section at the bottom so
+# you can freely experiment without touching the Python code.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Geographic region to render
+# ---------------------------------------------------------------------------
+region:
+  lat_min: 35       # Southern edge (degrees North; negative = South)
+  lat_max: 72       # Northern edge
+  lon_min: -25      # Western edge  (degrees East;  negative = West)
+  lon_max: 45       # Eastern edge
+
+  # Sampling resolution in degrees.
+  # Smaller values → more API calls → finer input grid → slower but more detailed.
+  # Recommended range: 0.5 (fine) to 2.0 (fast preview).
+  # 1.0° ≈ 111 km at the equator.
+  grid_resolution: 2.0
+
+# ---------------------------------------------------------------------------
+# Weather data to fetch (Open-Meteo historical archive — free, no API key)
+# ---------------------------------------------------------------------------
+data:
+  # Any ISO 8601 date from 1940-01-01 to ~5 days ago.
+  date: "2023-07-15"
+
+  # Hour of day in UTC (0–23).
+  hour: 12
+
+  # Weather variable.  Full list at https://open-meteo.com/en/docs/historical-weather-api
+  # Popular options:
+  #   temperature_2m          — Air temperature at 2 m (°C)
+  #   apparent_temperature    — Feels-like temperature (°C)
+  #   wind_speed_10m          — Wind speed at 10 m (km/h)
+  #   wind_gusts_10m          — Wind gusts at 10 m (km/h)
+  #   surface_pressure        — Surface pressure (hPa)
+  #   precipitation           — Total precipitation (mm)
+  #   cloud_cover             — Total cloud cover (%)
+  #   shortwave_radiation     — Solar radiation (W/m²)
+  #   relative_humidity_2m    — Relative humidity at 2 m (%)
+  variable: "temperature_2m"
+
+# ---------------------------------------------------------------------------
+# HTTP fetch settings
+# ---------------------------------------------------------------------------
+fetch:
+  # Maximum parallel HTTP requests (tune to avoid rate-limiting).
+  max_workers: 20
+  # Per-request timeout in seconds.
+  timeout: 30
+
+# ---------------------------------------------------------------------------
+# Output image
+# ---------------------------------------------------------------------------
+output:
+  # Output file name.  Use .png for lossless quality.
+  filename: "weather_art.png"
+
+  # Image dimensions in pixels.
+  # The actual dimensions are adjusted to match the geographic aspect ratio
+  # so these act as an upper bound.
+  #   4K  — 3840 × 2160
+  #   8K  — 7680 × 4320
+  #   A0 poster at 300 DPI — 9933 × 14043 (portrait) / 14043 × 9933 (landscape)
+  width: 3840
+  height: 2160
+
+  # DPI for print metadata.  300 DPI is standard for high-quality printing.
+  dpi: 300
+
+  # Gaussian smoothing radius in degrees (applied after interpolation).
+  # Larger values produce softer, more painterly transitions.
+  # Set to 0 to disable.
+  smooth_sigma: 1.5
+
+  # Colour map to use.  Either:
+  #   • A key defined in the `colormaps` section below, or
+  #   • Any matplotlib colormap name (viridis, plasma, inferno, magma,
+  #     RdBu_r, coolwarm, turbo, jet, YlOrRd, BuPu, etc.)
+  colormap: "temperature_europe"
+
+  # Optional: produce a separate colour-bar PNG alongside the main image.
+  colorbar: true
+
+  # Optional: hard-code the value range instead of deriving it from the data
+  # or the colormap stops.  Useful for comparing multiple images consistently.
+  # vmin: -20
+  # vmax: 40
+
+# =============================================================================
+# Custom colour maps
+# =============================================================================
+# Each entry is a list of colour stops: {value, color}.
+# • `value` is in the same units as the weather variable.
+# • `color` can be any hex string (#rrggbb / #rrggbbaa) or a matplotlib
+#   named colour (e.g. "navy", "gold", "white").
+# The stops do NOT need to be evenly spaced — use closer stops where you want
+# sharper transitions, and wider gaps for smooth gradients.
+# =============================================================================
+colormaps:
+
+  # -------------------------------------------------------------------------
+  # Temperature
+  # -------------------------------------------------------------------------
+
+  # Classic meteorological blue→green→yellow→red scheme (°C)
+  temperature_europe:
+    - { value: -30, color: "#0d0221" }   # near-black purple  (Arctic cold)
+    - { value: -20, color: "#1a0535" }   # deep violet
+    - { value: -10, color: "#0d3b8e" }   # dark blue
+    - { value:  -5, color: "#1565c0" }   # medium blue
+    - { value:   0, color: "#42a5f5" }   # sky blue           (freezing point)
+    - { value:   5, color: "#80deea" }   # cyan
+    - { value:  10, color: "#a5d6a7" }   # light green
+    - { value:  15, color: "#dce775" }   # yellow-green
+    - { value:  20, color: "#ffee58" }   # yellow
+    - { value:  25, color: "#ffa726" }   # orange
+    - { value:  30, color: "#ef5350" }   # red
+    - { value:  40, color: "#4a0404" }   # near-black red     (extreme heat)
+
+  # Soft pastel palette — gentle on the eyes, good for framing
+  temperature_pastel:
+    - { value: -20, color: "#b3cde0" }
+    - { value:  -5, color: "#cceeff" }
+    - { value:   5, color: "#d4edda" }
+    - { value:  15, color: "#fff3cd" }
+    - { value:  25, color: "#ffd6a5" }
+    - { value:  35, color: "#ffb3b3" }
+
+  # Vibrant neon — striking poster art
+  temperature_neon:
+    - { value: -25, color: "#050523" }
+    - { value: -10, color: "#1400ff" }
+    - { value:   0, color: "#00e5ff" }
+    - { value:  10, color: "#00ff80" }
+    - { value:  20, color: "#ffff00" }
+    - { value:  30, color: "#ff8000" }
+    - { value:  40, color: "#ff0040" }
+
+  # Dark minimal — deep space feel
+  temperature_dark:
+    - { value: -30, color: "#000000" }
+    - { value: -15, color: "#1b2a4a" }
+    - { value:  -5, color: "#1e4d7b" }
+    - { value:   5, color: "#2196f3" }
+    - { value:  15, color: "#4caf50" }
+    - { value:  25, color: "#cddc39" }
+    - { value:  35, color: "#f44336" }
+    - { value:  45, color: "#ffffff" }
+
+  # -------------------------------------------------------------------------
+  # Wind speed (km/h)
+  # -------------------------------------------------------------------------
+
+  # Light steel blue → deep navy → vivid purple (calm → stormy)
+  wind_calm_to_storm:
+    - { value:   0, color: "#eaf4fb" }
+    - { value:  10, color: "#a8d8ea" }
+    - { value:  20, color: "#70b8d0" }
+    - { value:  40, color: "#3a7ca5" }
+    - { value:  60, color: "#1e3f66" }
+    - { value:  80, color: "#4a0072" }
+    - { value: 100, color: "#220040" }
+    - { value: 140, color: "#000000" }
+
+  # Aurora borealis — black to green to white glow
+  wind_aurora:
+    - { value:   0, color: "#000000" }
+    - { value:  15, color: "#003d1f" }
+    - { value:  30, color: "#006633" }
+    - { value:  50, color: "#00cc66" }
+    - { value:  70, color: "#00ffaa" }
+    - { value:  90, color: "#aaffdd" }
+    - { value: 120, color: "#ffffff" }
+
+  # Warm fire — calm is cool grey, gusts glow orange/yellow
+  wind_fire:
+    - { value:   0, color: "#1a1a2e" }
+    - { value:  20, color: "#16213e" }
+    - { value:  40, color: "#8b0000" }
+    - { value:  60, color: "#cc3300" }
+    - { value:  80, color: "#ff6600" }
+    - { value: 100, color: "#ffcc00" }
+    - { value: 130, color: "#ffffff" }
+
+  # -------------------------------------------------------------------------
+  # Surface pressure (hPa)
+  # -------------------------------------------------------------------------
+
+  # Red (low) → white (standard) → blue (high)
+  pressure_classic:
+    - { value:  970, color: "#800000" }
+    - { value:  985, color: "#cc4400" }
+    - { value:  995, color: "#ff8800" }
+    - { value: 1005, color: "#ffdd00" }
+    - { value: 1013, color: "#ffffff" }   # standard atmosphere
+    - { value: 1020, color: "#aaddff" }
+    - { value: 1030, color: "#0066cc" }
+    - { value: 1040, color: "#002266" }
+
+  # Diverging navy/teal — low-pressure troughs vs. high-pressure ridges
+  pressure_ocean:
+    - { value:  960, color: "#200020" }
+    - { value:  980, color: "#004080" }
+    - { value:  995, color: "#0080c0" }
+    - { value: 1013, color: "#e0f7fa" }
+    - { value: 1025, color: "#80cbc4" }
+    - { value: 1040, color: "#004d40" }
+
+  # -------------------------------------------------------------------------
+  # Precipitation (mm)
+  # -------------------------------------------------------------------------
+
+  # White (dry) → blue (heavy rain)
+  precipitation_blues:
+    - { value:   0,  color: "#f7fbff" }
+    - { value:   0.5, color: "#c6dbef" }
+    - { value:   2,  color: "#6baed6" }
+    - { value:   5,  color: "#2171b5" }
+    - { value:  10,  color: "#084594" }
+    - { value:  25,  color: "#041a40" }
+
+  # Radar-style: green → yellow → red → purple (light → extreme)
+  precipitation_radar:
+    - { value:   0,   color: "#ffffff" }
+    - { value:   0.2, color: "#00cc00" }
+    - { value:   1,   color: "#009900" }
+    - { value:   3,   color: "#ffff00" }
+    - { value:   6,   color: "#ff9900" }
+    - { value:  12,   color: "#ff0000" }
+    - { value:  25,   color: "#cc00cc" }
+    - { value:  50,   color: "#660066" }
+
+  # -------------------------------------------------------------------------
+  # Cloud cover (%)
+  # -------------------------------------------------------------------------
+
+  # Deep blue sky → grey overcast
+  cloud_sky:
+    - { value:   0, color: "#0e2a5e" }   # deep night blue (clear)
+    - { value:  20, color: "#1565c0" }
+    - { value:  40, color: "#42a5f5" }
+    - { value:  60, color: "#90caf9" }
+    - { value:  80, color: "#cfd8dc" }
+    - { value: 100, color: "#607d8b" }   # overcast grey
+
+  # -------------------------------------------------------------------------
+  # Solar radiation (W/m²)
+  # -------------------------------------------------------------------------
+
+  # Black (night) → deep red → orange → yellow → white (intense noon sun)
+  solar_heat:
+    - { value:    0, color: "#000000" }
+    - { value:  100, color: "#1a0500" }
+    - { value:  300, color: "#7a1e00" }
+    - { value:  500, color: "#cc4400" }
+    - { value:  700, color: "#ff9900" }
+    - { value:  900, color: "#ffee55" }
+    - { value: 1100, color: "#ffffff" }
+
+  # -------------------------------------------------------------------------
+  # Relative humidity (%)
+  # -------------------------------------------------------------------------
+
+  # Tan (dry desert) → lush green (humid tropics)
+  humidity_desert_to_tropics:
+    - { value:   0, color: "#f5deb3" }   # wheat / desert
+    - { value:  20, color: "#deb887" }
+    - { value:  40, color: "#8fbc8f" }
+    - { value:  60, color: "#228b22" }
+    - { value:  80, color: "#006400" }
+    - { value: 100, color: "#003300" }
